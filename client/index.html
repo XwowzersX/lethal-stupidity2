@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #chat { width: 500px; height: 300px; border: 1px solid #ccc; overflow-y: scroll; margin-bottom: 10px; }
+        #players { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Client</h1>
+    <input type="text" id="playerName" placeholder="Enter your name" />
+    <button onclick="connect()">Connect</button>
+    <div id="status">Offline</div>
+    <div id="chat"></div>
+    <input type="text" id="message" placeholder="Type your message" />
+    <button onclick="sendMessage()">Send</button>
+    <div id="players"></div>
+
+    <script>
+        let ws;
+        const statusDiv = document.getElementById('status');
+        const chatDiv = document.getElementById('chat');
+        const playersDiv = document.getElementById('players');
+        let playerName = '';
+
+        function connect() {
+            playerName = document.getElementById('playerName').value;
+            ws = new WebSocket('wss://your-websocket-server');
+
+            ws.onopen = function() {
+                statusDiv.textContent = 'Online';
+                ws.send(JSON.stringify({ type: 'join', name: playerName }));
+            };
+
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'chat') {
+                    chatDiv.innerHTML += '<div><strong>' + data.name + ':</strong> ' + data.message + '</div>';
+                } else if (data.type === 'playerList') {
+                    updatePlayerList(data.players);
+                }
+            };
+
+            ws.onclose = function() {
+                statusDiv.textContent = 'Offline';
+            };
+        }
+
+        function sendMessage() { 
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value;
+            ws.send(JSON.stringify({ type: 'chat', message: message, name: playerName }));
+            messageInput.value = '';
+        }
+
+        function updatePlayerList(players) {
+            playersDiv.innerHTML = '<h3>Players Online:</h3>' + players.map(p => '<div>' + p + '</div>').join('');
+        }
+    </script>
+</body>
+</html>
