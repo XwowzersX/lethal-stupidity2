@@ -1,0 +1,1 @@
+{"name": "lethal-stupidity2", "version": "1.0.0", "scripts": {"start": "ts-node server/index.ts", "dev": "ts-node-dev server/index.ts"}, "dependencies": {"express": "^4.17.1", "ws": "^8.0.0"}}
